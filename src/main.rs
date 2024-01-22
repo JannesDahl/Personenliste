@@ -1,4 +1,6 @@
+use std::env;
 use std::fs::File;
+use std::io;
 use std::io::{Write, BufReader, BufRead, Error};
 
 use person::Person;
@@ -6,16 +8,20 @@ use person::Genders;
 mod person;
 
 fn main() -> Result<(), Error> {
-    let file_path = "C:\\Rust\\Personenliste\\textfiles\\test.txt";
-    
-    concatenate_strings("This is".to_string());
-    let write_result = write_to_file(file_path);
+    let file_path = env::current_dir()?.display().to_string() + "\\textfiles\\test.txt";
+
+    let mut input = String::new();
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
+
+    let write_result = write_to_file(&file_path, input);
     match write_result {
         Ok(file) => file,
         Err(error) => panic!("Problem writing in the file: {:?}", error),
     }
 
-    let read_result = read_from_file(file_path);
+    let read_result = read_from_file(&file_path);
     match read_result {
         Ok(file) => file,
         Err(error) => panic!("Problem opening the file: {:?}", error),
@@ -28,14 +34,14 @@ fn main() -> Result<(), Error> {
     Ok(())
 }
 
-fn write_to_file(file_path: &str) -> Result<(), Error> {
+fn write_to_file(file_path: &String, file_content: String) -> Result<(), Error> {
     let mut output = File::create(file_path)?;
-    write!(output, "File Output")?;
+    write!(output, "{}", file_content)?;
 
     Ok(())
 }
 
-fn read_from_file(file_path: &str) -> Result<(), Error> {
+fn read_from_file(file_path: &String) -> Result<(), Error> {
     let input = File::open(file_path)?;
     let buffered = BufReader::new(input);
 
@@ -44,12 +50,4 @@ fn read_from_file(file_path: &str) -> Result<(), Error> {
     }
 
     Ok(())
-}
-
-fn concatenate_strings(foo: String) {
-    let mut owned_string = foo.to_owned();
-    let borrowed_string: &str = " concatenated";
-    
-    owned_string.push_str(borrowed_string);
-    println!("{owned_string}");
 }
